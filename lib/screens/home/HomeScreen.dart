@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 
+import '../../model/userModel.dart';
 import 'HomeScreenState.dart';
 
 class HomePage extends StatefulWidget {
-  final String mnemonic;
-  final String account;
-  final String pubKey;
+  final UserDataModel userData;
 
-  HomePage({Key? key, required this.mnemonic, required this.account, required this.pubKey})
+  HomePage({Key? key, required this.userData})
       : super(key: key);
 
   @override

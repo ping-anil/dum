@@ -34,6 +34,13 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
+  solana: ^0.21.0
+  bip39: ^1.0.6
+  lottie: ^1.2.1
+  flutter_secure_storage: ^5.0.2
+  http: any
+  dio: ^4.0.4
+  json_serializable: ^6.1.5
 
 dev_dependencies:
   flutter_test:
@@ -49,13 +56,7 @@ dev_dependencies:
   # For information on the generic Dart part of this file, see the
   # following page: https://dart.dev/tools/pub/pubspec
 
-  solana: ^0.21.0
-  bip39: ^1.0.6
-  lottie: ^1.2.1
-  flutter_secure_storage: ^5.0.2
-  shared_preferences: ^2.0.13
-  flutter_js: ^0.5.0+6
-  
+  build_runner: any
 
 
 # The following section is specific to Flutter.

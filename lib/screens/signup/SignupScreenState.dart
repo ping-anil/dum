@@ -1,26 +1,21 @@
 import 'package:aa/screens/signup/SignupScreen.dart';
-import 'package:aa/utils/SecureStorage.dart';
-import 'package:bip39/bip39.dart' as bip39;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
 import 'package:lottie/lottie.dart';
-import 'package:solana/solana.dart';
-import 'package:solana/src/crypto/ed25519_hd_keypair.dart';
 
+import '../../model/userModel.dart';
 import '../home/HomeScreen.dart';
 
 class SignupScreenState extends State<SignupScreen> {
-  String _randomMnemonic = "";
+  final _formKey = GlobalKey<FormState>();
 
   final TextEditingController _password = TextEditingController();
-  final TextEditingController _confirmPassword = TextEditingController();
-
-  final _formKey = GlobalKey<FormState>();
+  final TextEditingController _phoneNumber = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _randomMnemonic = bip39.generateMnemonic();
   }
 
   @override
@@ -45,30 +40,6 @@ class SignupScreenState extends State<SignupScreen> {
           height: 150,
           child: Lottie.asset('lottieFiles/splash_wallet.json'),
         ),
-        Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.red, width: 5),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Text(_randomMnemonic)),
-        Padding(
-          padding: const EdgeInsets.all(20),
-          child: OutlinedButton(
-            style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.all(20),
-                primary: Colors.orange,
-                side: const BorderSide(color: Colors.red)),
-            onPressed: () => copyText(),
-            child: const Text("Copy Text"),
-          ),
-        ),
-        const Padding(
-          padding: EdgeInsets.all(20),
-          child: Text(
-            "Please save the text above as it will be used to access your account",
-          ),
-        ),
         _getForm(),
       ],
     ));
@@ -79,12 +50,32 @@ class SignupScreenState extends State<SignupScreen> {
         key: _formKey,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _getPasswordField(),
-            _getConfirmPasswordField(),
-            _getButton()
-          ],
+          children: [_getPhoneNumberField(), _getPasswordField(), _getButton()],
         ));
+  }
+
+  Widget _getPhoneNumberField() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+      child: TextFormField(
+        controller: _phoneNumber,
+        keyboardType: TextInputType.phone,
+        maxLength: 10,
+        validator: (value) {
+          if (value != null && value.isEmpty) {
+            return 'Please enter username ';
+          }
+          if (value != null && value.length < 10) {
+            return 'invalid number';
+          }
+          return null;
+        },
+        decoration: const InputDecoration(
+          border: OutlineInputBorder(),
+          labelText: 'Enter phone number',
+        ),
+      ),
+    );
   }
 
   Widget _getPasswordField() {
@@ -94,13 +85,13 @@ class SignupScreenState extends State<SignupScreen> {
         controller: _password,
         obscureText: true,
         keyboardType: TextInputType.text,
-        maxLength: 20,
+        maxLength: 10,
         validator: (value) {
           if (value != null && value.isEmpty) {
             return 'Please enter password';
           }
-          if (value != null && value.length < 8) {
-            return 'password must contain 8 characters';
+          if (value != null && value.length < 4) {
+            return 'password must contain 4 characters';
           }
           return null;
         },
@@ -112,36 +103,11 @@ class SignupScreenState extends State<SignupScreen> {
     );
   }
 
-  Widget _getConfirmPasswordField() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-      child: TextFormField(
-        controller: _confirmPassword,
-        obscureText: true,
-        keyboardType: TextInputType.text,
-        maxLength: 20,
-        validator: (value) {
-          if (value != null && value.isEmpty) {
-            return 'password mismatch';
-          }
-          if (_password.text != _confirmPassword.text) {
-            return 'password mismatch';
-          }
-          return null;
-        },
-        decoration: const InputDecoration(
-          border: OutlineInputBorder(),
-          labelText: 'Confirm password',
-        ),
-      ),
-    );
-  }
-
   Widget _getButton() {
     return Padding(
       padding: const EdgeInsets.all(30),
       child: ElevatedButton(
-        onPressed: () => {_submitForm()},
+        onPressed: () => {_submitForm(_phoneNumber.text, _password.text)},
         style: ElevatedButton.styleFrom(
             padding:
                 const EdgeInsets.symmetric(horizontal: 40.0, vertical: 20.0),
@@ -149,47 +115,48 @@ class SignupScreenState extends State<SignupScreen> {
                 borderRadius: BorderRadius.circular(10.0)),
             primary: Colors.green),
         child: const Text(
-          "PROCEED",
+          "Create Account",
           style: TextStyle(color: Colors.white, fontSize: 18),
         ),
       ),
     );
   }
 
-  void copyText() {
-    Clipboard.setData(ClipboardData(text: _randomMnemonic)).then((_) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text("Copied to clipboard")));
-    });
-  }
-
-  void _submitForm() {
+  void _submitForm(String phone, String password) {
     final isFormValid = _formKey.currentState?.validate();
     if (isFormValid == true) {
-      _encryptAndSaveCreds();
+      _createUser(phone, password);
     }
   }
 
-  void _encryptAndSaveCreds() async {
-    final mnemonic = _randomMnemonic;
-    final password = _password.text;
-    SecureStorage.saveMnemonic(password, mnemonic);
-    final pubKeyPair = await Ed25519HDKeyPair.fromMnemonic(mnemonic);
-    final address = pubKeyPair.address;
-    SecureStorage.saveMnemonic("address", address);
-    final pubKey = await pubKeyPair.extractPublicKey();
-    SecureStorage.saveMnemonic("pubKey", pubKey.bytes.toString());
-    _moveToHomeScreen(mnemonic, address, pubKey.bytes.toString());
+  void _createUser(String phone, String password) async {
+    UserDataModel _data = await _createUserRequest(phone, password);
+    _moveToHomeScreen(_data);
   }
 
-  void _moveToHomeScreen(String mnemonic, String address, String pubKey) {
+  void _moveToHomeScreen(UserDataModel data) {
+    print("data.toString()");
+    print(data.toString());
+    print(data.user.toString());
+    print(data.publicKey.toString());
+    print(data.balance.toString());
     Navigator.push(
         context,
         MaterialPageRoute(
             builder: (context) => HomePage(
-                  mnemonic: mnemonic,
-                  account: address,
-                  pubKey: pubKey,
+                  userData: data,
                 )));
   }
 } //class
+
+Future<UserDataModel> _createUserRequest(String phone, String password) async {
+  const String apiUrl = "http://localhost:3000/signup";
+  var data = await http.post(Uri.parse(apiUrl), body: {"phone": phone, "password": password});
+  print(data.body);
+  var _user = userDataModelFromJson(data.body.toString());
+  print(_user.message);
+  print(_user.balance);
+  print(_user.user.toString());
+  print(_user.publicKey);
+  return _user;
+}

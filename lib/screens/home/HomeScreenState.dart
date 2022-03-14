@@ -1,35 +1,28 @@
-import 'package:aa/utils/SolanaNetwork.dart';
+
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:solana/src/rpc/client.dart';
-import 'package:solana/src/solana_client.dart';
-
 import 'HomeScreen.dart';
 
 class HomeScreenState extends State<HomePage> {
   int selectedBottomNavIndex = 0;
   String _publicKey = "";
-  String _owner = "";
-  String _account = "";
-  String _mnemonic = "";
   String _balance = "";
+  String? _userPhone = "";
 
   @override
   void initState() {
     super.initState();
-    _publicKey = widget.pubKey;
-    _account = widget.account;
-    _mnemonic = widget.mnemonic;
+    _publicKey = widget.userData.publicKey.toString();
+    _balance = widget.userData.balance.toString();
+    _userPhone = widget.userData.user?.phone.toString();
     _getAccountDetails();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // drawer: NavDrawer(),
-      // appBar: HomeAppBar(),
       body: getBody(), //body
-      // bottomNavigationBar: getBottomNavBar() //bottom navigation bar
     ); //scaffold
   }
 
@@ -39,7 +32,7 @@ class HomeScreenState extends State<HomePage> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         Text(
-          "Details \n account : $_account \n Balance : $_balance \n Pubkey: $_publicKey \n owner \n _owner",
+          "Details \n account : $_publicKey \n Balance : $_balance",
         ),
         Padding(
           padding: EdgeInsets.all(20),
@@ -67,42 +60,24 @@ class HomeScreenState extends State<HomePage> {
   }
 
   void _getAccountDetails() async {
-    _getBalance(_account);
-    String s = "acc($_account)  bal($_balance) <--> owner($_owner)";
-    _getBalance(_publicKey);
-    s = s + "acc($_account)  bal($_balance) <--> owner($_owner)";
-    Clipboard.setData(ClipboardData(text: s))
-        .then((_) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text("Copied to clipboard")));
-    });
-    setState(() {
-      _account;
-      _mnemonic;
-      _balance;
-      _owner;
-    });
-  }
 
-  void _getBalance(String balance) async {
-
-    final solanaClient = SolanaClient(
-        rpcUrl: Uri.parse(SolanaNetwork.Current.rpc),
-      websocketUrl: Uri.parse(SolanaNetwork.Current.ws)
-    );
-
-    final rpc = solanaClient.rpcClient;
-    final info = await rpc.getAccountInfo(_account);
-    final ownerString = info?.owner.toString();
-    _owner = ownerString!;
-    if (info == null) {
-      _balance = "0";
-    } else {
-      _balance = info.lamports.toString();
-    }
   }
 
   void _requestAirDrop() async {
+    _initiateAirDrop();
     _getAccountDetails();
   }
+
+  void _initiateAirDrop() async {
+    if(_userPhone!=null){
+      _initiateAirDropRequest(_userPhone!);
+    }
+  }
+
 } //class
+
+
+void _initiateAirDropRequest(String phone) async {
+  const String apiUrl = "http://localhost:3000/airDropSol";
+  var data = await http.post(Uri.parse(apiUrl), body: {"phone": phone});
+}
