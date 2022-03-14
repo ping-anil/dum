@@ -135,11 +135,6 @@ class SignupScreenState extends State<SignupScreen> {
   }
 
   void _moveToHomeScreen(UserDataModel data) {
-    print("data.toString()");
-    // print(data.toString());
-    // print(data.user.toString());
-    // print(data.publicKey.toString());
-    // print(data.balance.toString());
     Navigator.push(
         context,
         MaterialPageRoute(
@@ -157,7 +152,6 @@ Future<UserDataModel> _createUserRequest(String phone, String password) async {
     var data = userDataModelFromJson(response.body);
     return data;
   }else{
-    print("parsing error");
     return UserDataModel();
   }
 }

@@ -39,6 +39,7 @@ class User {
   String? userId;
   String? phone;
   String? password;
+  String? balance;
   PrivateKey? privateKey;
   PrivateKey? publicKey;
   String? sId;
@@ -50,6 +51,7 @@ class User {
     userId = json['userId'];
     phone = json['phone'];
     password = json['password'];
+    balance = json['balance'];
     privateKey = json['privateKey'] != null
         ? new PrivateKey.fromJson(json['privateKey'])
         : null;
@@ -65,6 +67,7 @@ class User {
     data['userId'] = this.userId;
     data['phone'] = this.phone;
     data['password'] = this.password;
+    data['balance'] = this.balance;
     if (this.privateKey != null) {
       data['privateKey'] = this.privateKey?.toJson();
     }

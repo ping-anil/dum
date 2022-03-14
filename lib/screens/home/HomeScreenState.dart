@@ -1,7 +1,6 @@
-
-import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
+
 import 'HomeScreen.dart';
 
 class HomeScreenState extends State<HomePage> {
@@ -14,7 +13,11 @@ class HomeScreenState extends State<HomePage> {
   void initState() {
     super.initState();
     _publicKey = widget.userData.publicKey.toString();
-    _balance = "widget.userData.balance.toString()";
+    if (widget.userData.user == null && widget.userData.user?.balance == null) {
+      _balance = "0";
+    } else {
+      _balance = widget.userData.user!.balance!.toString();
+    }
     _userPhone = widget.userData.user?.phone.toString();
     _getAccountDetails();
   }
@@ -59,9 +62,7 @@ class HomeScreenState extends State<HomePage> {
     ));
   }
 
-  void _getAccountDetails() async {
-
-  }
+  void _getAccountDetails() async {}
 
   void _requestAirDrop() async {
     _initiateAirDrop();
@@ -69,13 +70,11 @@ class HomeScreenState extends State<HomePage> {
   }
 
   void _initiateAirDrop() async {
-    if(_userPhone!=null){
+    if (_userPhone != null) {
       _initiateAirDropRequest(_userPhone!);
     }
   }
-
 } //class
-
 
 void _initiateAirDropRequest(String phone) async {
   const String apiUrl = "http://localhost:3000/airDropSol";
