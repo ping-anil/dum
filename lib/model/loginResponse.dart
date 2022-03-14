@@ -1,25 +1,23 @@
-// To parse this JSON data, do
-//
-//     final userDataModel = userDataModelFromJson(jsonString);
-
 import 'dart:convert';
 
-UserDataModel userDataModelFromJson(String str) => UserDataModel.fromJson(json.decode(str));
 
-String userDataModelToJson(UserDataModel data) => json.encode(data.toJson());
 
-class UserDataModel {
+
+class LoginResponse {
   String? message;
   String? token;
   User? user;
+  int? balance;
   String? publicKey;
 
-  UserDataModel();
+  LoginResponse(
+      {this.message, this.token, this.user, this.balance, this.publicKey});
 
-  UserDataModel.fromJson(Map<String, dynamic> json) {
+  LoginResponse.fromJson(Map<String, dynamic> json) {
     message = json['message'];
     token = json['token'];
     user = json['user'] != null ? new User.fromJson(json['user']) : null;
+    balance = json['balance'];
     publicKey = json['publicKey'];
   }
 
@@ -30,54 +28,52 @@ class UserDataModel {
     if (this.user != null) {
       data['user'] = this.user?.toJson();
     }
+    data['balance'] = this.balance;
     data['publicKey'] = this.publicKey;
     return data;
   }
 }
 
-
-
-
 class User {
+  String? sId;
   String? userId;
   String? phone;
   String? password;
-  String? balance;
   PrivateKey? privateKey;
   PrivateKey? publicKey;
-  String? sId;
+  String? balance;
   int? iV;
 
   User();
 
   User.fromJson(Map<String, dynamic> json) {
+    sId = json['_id'];
     userId = json['userId'];
     phone = json['phone'];
     password = json['password'];
-    balance = json['balance'];
     privateKey = json['privateKey'] != null
         ? new PrivateKey.fromJson(json['privateKey'])
         : null;
     publicKey = json['publicKey'] != null
         ? new PrivateKey.fromJson(json['publicKey'])
         : null;
-    sId = json['_id'];
+    balance = json['balance'];
     iV = json['__v'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['_id'] = this.sId;
     data['userId'] = this.userId;
     data['phone'] = this.phone;
     data['password'] = this.password;
-    data['balance'] = this.balance;
     if (this.privateKey != null) {
       data['privateKey'] = this.privateKey?.toJson();
     }
     if (this.publicKey != null) {
       data['publicKey'] = this.publicKey?.toJson();
     }
-    data['_id'] = this.sId;
+    data['balance'] = this.balance;
     data['__v'] = this.iV;
     return data;
   }

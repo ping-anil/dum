@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
-
 import '../../model/userModel.dart';
 import '../home/HomeScreen.dart';
 import '../loginSignupSelection/LoginSignupSelectionScreen.dart';
@@ -130,6 +129,7 @@ class LoginScreenState extends State<LoginScreen> {
   }
 
   void _moveToHomeScreen(UserDataModel data) {
+    print("_moveToHomeScreen");
     Navigator.push(
         context,
         MaterialPageRoute(
@@ -139,33 +139,28 @@ class LoginScreenState extends State<LoginScreen> {
   }
 
   void _loginUser() async {
-    // final mnemonic = await SecureStorage.getSavedMnemonic(_password.text);
-    // if (mnemonic == null || mnemonic.isEmpty) {
-    //   Clipboard.setData(ClipboardData(text: "invalid 123")).then((_) {
-    //     ScaffoldMessenger.of(context)
-    //         .showSnackBar(const SnackBar(content: Text("invalid")));
-    //   });
-    // } else {
-    //   final pubKeyPair = await Ed25519HDKeyPair.fromMnemonic(mnemonic);
-    //   final address = pubKeyPair.address;
-    //   final pubKey = await pubKeyPair.extractPublicKey();
-    //   _moveToHomeScreen(mnemonic, address, pubKey.bytes.toString());
-    //   Clipboard.setData(ClipboardData(text: "mnemonic ($mnemonic)  ;;;  pk($pubKeyPair)")).then((_) {
-    //     ScaffoldMessenger.of(context)
-    //         .showSnackBar(const SnackBar(content: Text("done")));
-    //   });
-    // }
+    print("_loginUser");
+    var data = await loginUser(_phoneNumber.text, _password.text);
+    print(data.token);
+    _moveToHomeScreen(data);
   }
 } //class
 
-Future<UserDataModel> loginUser(String phone, String password) async {
-  const String apiUrl = "https://localhost:3000/login";
-  var data = await http
-      .post(Uri.parse(apiUrl), body: {"phone": phone, "password": password});
 
-  if (data.statusCode == 200) {
-    return userDataModelFromJson(data.body);
-  } else {
+
+
+Future<UserDataModel> loginUser(String phone, String password) async {
+  const String apiUrl = "http://localhost:3000/login";
+  print("fffffffff");
+  var response = await http.post(Uri.parse(apiUrl), body: {"phone": phone, "password": password});
+  print(response.body);
+  if(response.statusCode==200){
+    var data = userDataModelFromJson(response.body);
+    print("fffffffff333");
+    return data;
+  }else{
     return UserDataModel();
   }
 }
+
+
