@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
+import '../../model/userModel.dart';
 import 'HomeScreen.dart';
 
 class HomeScreenState extends State<HomePage> {
@@ -19,7 +20,6 @@ class HomeScreenState extends State<HomePage> {
       _balance = widget.userData.user!.balance!.toString();
     }
     _userPhone = widget.userData.user?.phone.toString();
-    _getAccountDetails();
   }
 
   @override
@@ -62,21 +62,26 @@ class HomeScreenState extends State<HomePage> {
     ));
   }
 
-  void _getAccountDetails() async {}
-
   void _requestAirDrop() async {
-    _initiateAirDrop();
-    _getAccountDetails();
-  }
-
-  void _initiateAirDrop() async {
     if (_userPhone != null) {
       _initiateAirDropRequest(_userPhone!);
     }
   }
+
+
 } //class
 
-void _initiateAirDropRequest(String phone) async {
+
+Future<UserDataModel> _initiateAirDropRequest(String phone) async {
+  print("sssssss");
   const String apiUrl = "http://localhost:3000/airDropSol";
-  var data = await http.post(Uri.parse(apiUrl), body: {"phone": phone});
+  var response = await http.post(Uri.parse(apiUrl), body: {"phone": phone});
+  print(response.body);
+  if(response.statusCode==200){
+    var data = userDataModelFromJson(response.body);
+    return data;
+  }else{
+    return UserDataModel();
+  }
 }
+
