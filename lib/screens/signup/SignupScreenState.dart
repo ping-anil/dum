@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:lottie/lottie.dart';
-
+import 'dart:convert' as convert;
 import '../../model/userModel.dart';
 import '../home/HomeScreen.dart';
 
@@ -136,10 +136,10 @@ class SignupScreenState extends State<SignupScreen> {
 
   void _moveToHomeScreen(UserDataModel data) {
     print("data.toString()");
-    print(data.toString());
-    print(data.user.toString());
-    print(data.publicKey.toString());
-    print(data.balance.toString());
+    // print(data.toString());
+    // print(data.user.toString());
+    // print(data.publicKey.toString());
+    // print(data.balance.toString());
     Navigator.push(
         context,
         MaterialPageRoute(
@@ -151,12 +151,13 @@ class SignupScreenState extends State<SignupScreen> {
 
 Future<UserDataModel> _createUserRequest(String phone, String password) async {
   const String apiUrl = "http://localhost:3000/signup";
-  var data = await http.post(Uri.parse(apiUrl), body: {"phone": phone, "password": password});
-  print(data.body);
-  var _user = userDataModelFromJson(data.body.toString());
-  print(_user.message);
-  print(_user.balance);
-  print(_user.user.toString());
-  print(_user.publicKey);
-  return _user;
+  var response = await http.post(Uri.parse(apiUrl), body: {"phone": phone, "password": password});
+  print(response.body);
+  if(response.statusCode==200){
+    var data = userDataModelFromJson(response.body);
+    return data;
+  }else{
+    print("parsing error");
+    return UserDataModel();
+  }
 }

@@ -14,7 +14,7 @@ class HomeScreenState extends State<HomePage> {
   void initState() {
     super.initState();
     _publicKey = widget.userData.publicKey.toString();
-    _balance = widget.userData.balance.toString();
+    _balance = "widget.userData.balance.toString()";
     _userPhone = widget.userData.user?.phone.toString();
     _getAccountDetails();
   }

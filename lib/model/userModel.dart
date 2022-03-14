@@ -9,85 +9,89 @@ UserDataModel userDataModelFromJson(String str) => UserDataModel.fromJson(json.d
 String userDataModelToJson(UserDataModel data) => json.encode(data.toJson());
 
 class UserDataModel {
-  UserDataModel({
-    this.message,
-    this.token,
-    this.user,
-    this.balance,
-    this.publicKey,
-  });
-
   String? message;
-  String? token;
   User? user;
-  String? balance;
   String? publicKey;
 
-  factory UserDataModel.fromJson(Map<String, dynamic> json) => UserDataModel(
-    message: json["message"],
-    token: json["token"],
-    user: User.fromJson(json["user"]),
-  );
+  UserDataModel();
 
-  Map<String, dynamic> toJson() => {
-    "message": message,
-    "token": token,
-    "user": user?.toJson(),
-  };
+  UserDataModel.fromJson(Map<String, dynamic> json) {
+    message = json['message'];
+    user = json['user'] != null ? new User.fromJson(json['user']) : null;
+    publicKey = json['publicKey'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['message'] = this.message;
+    if (this.user != null) {
+      data['user'] = this.user?.toJson();
+    }
+    data['publicKey'] = this.publicKey;
+    return data;
+  }
 }
 
-class User {
-  User({
-    this.id,
-    this.userId,
-    this.phone,
-    this.password,
-    this.privateKey,
-    this.v=0,
-  });
 
-  String? id;
+
+
+class User {
   String? userId;
   String? phone;
   String? password;
   PrivateKey? privateKey;
-  int v;
+  PrivateKey? publicKey;
+  String? sId;
+  int? iV;
 
-  factory User.fromJson(Map<String, dynamic> json) => User(
-    id: json["_id"],
-    userId: json["userId"],
-    phone: json["phone"],
-    password: json["password"],
-    privateKey: PrivateKey.fromJson(json["privateKey"]),
-    v: json["__v"],
-  );
+  User();
 
-  Map<String, dynamic> toJson() => {
-    "_id": id,
-    "userId": userId,
-    "phone": phone,
-    "password": password,
-    "privateKey": privateKey?.toJson(),
-    "__v": v,
-  };
+  User.fromJson(Map<String, dynamic> json) {
+    userId = json['userId'];
+    phone = json['phone'];
+    password = json['password'];
+    privateKey = json['privateKey'] != null
+        ? new PrivateKey.fromJson(json['privateKey'])
+        : null;
+    publicKey = json['publicKey'] != null
+        ? new PrivateKey.fromJson(json['publicKey'])
+        : null;
+    sId = json['_id'];
+    iV = json['__v'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['userId'] = this.userId;
+    data['phone'] = this.phone;
+    data['password'] = this.password;
+    if (this.privateKey != null) {
+      data['privateKey'] = this.privateKey?.toJson();
+    }
+    if (this.publicKey != null) {
+      data['publicKey'] = this.publicKey?.toJson();
+    }
+    data['_id'] = this.sId;
+    data['__v'] = this.iV;
+    return data;
+  }
 }
 
 class PrivateKey {
-  PrivateKey({
-    this.type,
-    required this.data,
-  });
-
   String? type;
-  List<int> data;
+  List<int>? data;
 
-  factory PrivateKey.fromJson(Map<String, dynamic> json) => PrivateKey(
-    type: json["type"],
-    data: List<int>.from(json["data"].map((x) => x)),
-  );
+  PrivateKey();
 
-  Map<String, dynamic> toJson() => {
-    "type": type,
-    "data": List<dynamic>.from(data.map((x) => x)),
-  };
+  PrivateKey.fromJson(Map<String, dynamic> json) {
+    type = json['type'];
+    data = json['data'].cast<int>();
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['type'] = this.type;
+    data['data'] = this.data;
+    return data;
+  }
 }
